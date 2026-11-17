@@ -1,0 +1,19 @@
+{
+  "name": "Dev Environment",
+  "customizations": {
+    "codespaces": {
+      "repositories": {
+        "thorsphere/librechat-cloudrun": {
+          "permissions": {
+            "contents": "write"
+          }
+        }
+      }
+    },
+    "vscode": {
+      "settings": {
+        "git.autofetch": true
+      }
+    }
+  }
+}
