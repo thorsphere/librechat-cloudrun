@@ -1,0 +1,8 @@
+# Build context hygiene — the image is built from a pinned LibreChat clone,
+# nothing from this repo is copied in.
+.git
+.github
+.devcontainer
+*.md
+Dockerfile
+.dockerignore
