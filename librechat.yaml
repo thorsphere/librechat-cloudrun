@@ -1,0 +1,59 @@
+# Copyright (c) 2026 thorsphere.
+# All Rights Reserved. Use is governed by the Functional Source License v1.1
+# (FSL-1.1-ALv2) that can be found in the LICENSE file.
+#
+# LibreChat custom configuration for the Cloud Run deployment.
+# Full reference: https://www.librechat.ai/docs/configuration/librechat_yaml
+#
+# Secrets policy: NEVER put credentials in this file. Values support
+# ${ENV_VAR} interpolation; supply the actual values as Cloud Run env vars
+# (ideally from Secret Manager). This file is baked into the image and
+# committed to git, so it must contain no secrets.
+
+# Configuration schema version (required). Should match the LibreChat release
+# built by the Dockerfile (see ARG LIBRECHAT_VERSION).
+version: 1.3.19
+
+# In-memory response cache, per Cloud Run instance.
+cache: true
+
+# ---------------------------------------------------------------------------
+# Examples — uncomment and adapt as needed.
+# ---------------------------------------------------------------------------
+
+# The Cloud Run filesystem is ephemeral: local uploads disappear when the
+# instance restarts. Point fileStrategy at external storage if persistence
+# matters ("local" | "openai" | "azure").
+# fileStrategy: local
+
+# registration:
+#   socialLoginsEnabled: false
+
+# interface:
+#   endpointsMenu: true
+#   modelSelect: true
+
+# Custom AI endpoints. The API key is referenced via env interpolation and
+# must be set on the Cloud Run service (ideally from Secret Manager):
+#   gcloud run services update librechat --update-secrets OPENROUTER_API_KEY=...
+endpoints:
+  custom:
+    - name: "OpenRouter"
+      apiKey: "${OPENROUTER_API_KEY}"
+      baseURL: "https://openrouter.ai/api/v1"
+      models:
+        default:
+          - "google/gemini-3.8-flash"
+          - "google/gemini-4-hydrogen"
+          - "google/gemini-4-argon"
+          - "google/gemini-4-carbon"
+          - "openai/gpt-6.1-terra"
+          - "openai/gpt-6.2-sol"
+          - "openai/gpt-6.2-astra"
+          - "anthropic/claude-sonnet-5.5"
+          - "anthropic/claude-opus-5.5"
+          - "anthropic/claude-fable-5.2"
+        fetch: true # also offer OpenRouter's full model catalog in the picker
+      titleConvo: true
+      titleModel: "anthropic/claude-haiku-5.5"
+      dropParams: ["stop"] # some OpenRouter models reject the stop parameter
