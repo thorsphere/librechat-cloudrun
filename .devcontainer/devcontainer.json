@@ -11,6 +11,9 @@
       }
     },
     "vscode": {
+      "extensions": [
+        "googlecloudtools.cloudcode"
+      ],
       "settings": {
         "git.autofetch": true
       }
