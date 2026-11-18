@@ -3,6 +3,9 @@
 .git
 .github
 .devcontainer
+scripts
 *.md
 Dockerfile
 .dockerignore
+cloudbuild.yaml
+.gitignore
