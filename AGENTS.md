@@ -37,6 +37,12 @@ When generating code, refactoring, or planning tasks, you MUST adhere to these t
   own (a call, assignment, branch, or return). Scaffolding lines (braces,
   bare closures) may go without; const-block members each carry their own
   trailing comment.
+- **Naming prefixes:** identifiers in shared, project-scoped namespaces
+  (Secret Manager, IAM) carry an owning-service prefix (`librechat-` for the
+  app's secrets, `github-actions-` for the CI deployer). Names scoped to a
+  single container or repo stay unprefixed; GCP tooling env vars use
+  `GOOGLE_` (the full conventions are listed in §2). Apply the same pattern
+  to any new resource.
 
 ---
 
@@ -53,11 +59,13 @@ When generating code, refactoring, or planning tasks, you MUST adhere to these t
   service-account id is `github-actions-deployer`. The WIF provider and SA go
   in GitHub repo *variables*, not secrets (identifiers, not credentials; the
   trust boundary is the WIF attribute condition pinning the repo).
-- **Secret names are a three-file contract:** `mongo-uri`, `openrouter-api-key`,
-  `creds-key`, `creds-iv`, `jwt-secret`, `jwt-refresh-secret` (Secret Manager)
-  map 1:1 to `MONGO_URI`, `OPENROUTER_API_KEY`, `CREDS_KEY`, `CREDS_IV`,
-  `JWT_SECRET`, `JWT_REFRESH_SECRET` (env vars) across `gcp-setup.sh`,
-  `deploy.sh`, and the README. Rename = edit all three.
+- **Secret names are a three-file contract:** `librechat-mongo-uri`,
+  `librechat-openrouter-api-key`, `librechat-creds-key`, `librechat-creds-iv`,
+  `librechat-jwt-secret`, `librechat-jwt-refresh-secret` (Secret Manager,
+  `librechat-` prefix = names are project-scoped) map 1:1 to
+  `MONGO_URI`, `OPENROUTER_API_KEY`, `CREDS_KEY`, `CREDS_IV`,
+  `JWT_SECRET`, `JWT_REFRESH_SECRET` (env vars, fixed by LibreChat) across
+  `gcp-setup.sh`, `deploy.sh`, and the README. Rename = edit all three.
 - **Config is baked, not mounted:** `librechat.yaml` is `COPY`-ed into the
   image and config changes require a rebuild. Cloud Run has no volume mounts;
   immutable revisions are the point.
