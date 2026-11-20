@@ -61,6 +61,7 @@ endpoints:
 
 interface:
   modelSelect: true
+  parameters: true
 
 modelSpecs:
   enforce: false
