@@ -1,0 +1,56 @@
+# Copyright (c) 2026 thorsphere.
+# All Rights Reserved. Use is governed by the Functional Source License v1.1
+# (FSL-1.1-ALv2) that can be found in the LICENSE file.
+#
+# CI/CD: build the LibreChat image and deploy it to Cloud Run whenever the
+# deployment files change on main. Auth via Workload Identity Federation —
+# no long-lived GCP keys. The repository variables this needs are printed
+# by scripts/gcp-setup.sh.
+
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'librechat.yaml'
+      - 'cloudbuild.yaml'
+      - 'scripts/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write # required for Workload Identity Federation
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false # never interrupt a live deploy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      GOOGLE_PROJECT_ID: ${{ vars.GOOGLE_PROJECT_ID }}
+      GOOGLE_REGION: ${{ vars.GOOGLE_REGION }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ vars.GOOGLE_WORKLOAD_PROVIDER }}
+          service_account: ${{ vars.GOOGLE_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v3
+        with:
+          project_id: ${{ vars.GOOGLE_PROJECT_ID }}
+
+      - name: Build and deploy to Cloud Run
+        run: |
+          chmod +x scripts/deploy.sh
+          scripts/deploy.sh

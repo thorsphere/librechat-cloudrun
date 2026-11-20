@@ -1,0 +1,23 @@
+# Copyright (c) 2026 thorsphere.
+# All Rights Reserved. Use is governed by the Functional Source License v1.1
+# (FSL-1.1-ALv2) that can be found in the LICENSE file.
+#
+# Cloud Build spec used by scripts/deploy.sh and the GitHub Actions workflow.
+# Builds the LibreChat image and pushes it to Artifact Registry.
+# The 8-vCPU machine gives the Vite client build enough memory headroom.
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - '${_IMAGE}'
+      - '--build-arg'
+      - 'NODE_MAX_OLD_SPACE_SIZE=4096'
+      - '.'
+
+images:
+  - '${_IMAGE}'
+
+options:
+  machineType: 'E2_HIGHCPU_8'
