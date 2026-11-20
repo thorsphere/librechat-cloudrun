@@ -45,6 +45,7 @@ endpoints:
         default:
           - "google/gemini-3.8-flash"
           - "google/gemini-4-hydrogen"
+          - "google/gemini-4-neon"
           - "google/gemini-4-argon"
           - "google/gemini-4-carbon"
           - "openai/gpt-6.1-terra"
@@ -57,3 +58,59 @@ endpoints:
       titleConvo: true
       titleModel: "anthropic/claude-haiku-5.5"
       dropParams: ["stop"] # some OpenRouter models reject the stop parameter
+
+interface:
+  modelSelect: true
+
+modelSpecs:
+  enforce: false
+  prioritize: true
+  addedEndpoints:
+    - "OpenRouter"
+  list:
+    - name: "gemini-4-hydrogen"
+      label: "Gemini 4 Hydrogen"
+      softDefault: true
+      preset:
+        endpoint: "OpenRouter"
+        model: "google/gemini-4-hydrogen"
+    - name: "gemini-4-neon"
+      label: "Gemini 4 Neon"
+      preset:
+        endpoint: "OpenRouter"
+        model: "google/gemini-4-neon"
+    - name: "gemini-4-carbon"
+      label: "Gemini 4 Carbon"
+      preset:
+        endpoint: "OpenRouter"
+        model: "google/gemini-4-carbon"
+    - name: "gpt-6.1-terra"
+      label: "GPT 6.1 Terra"
+      preset:
+        endpoint: "OpenRouter"
+        model: "openai/gpt-6.1-terra"
+    - name: "gpt-6.2-sol"
+      label: "GPT 6.2 Sol"
+      preset:
+        endpoint: "OpenRouter"
+        model: "openai/gpt-6.2-sol"
+    - name: "gpt-6.2-astra"
+      label: "GPT 6.2 Astra"
+      preset:
+        endpoint: "OpenRouter"
+        model: "openai/gpt-6.2-astra"
+    - name: "claude-sonnet-5.5"
+      label: "Claude Sonnet 5.5"
+      preset:
+        endpoint: "OpenRouter"
+        model: "anthropic/claude-sonnet-5.5"
+    - name: "claude-opus-5.5"
+      label: "Claude Opus 5.5"
+      preset:
+        endpoint: "OpenRouter"
+        model: "anthropic/claude-opus-5.5"
+    - name: "claude-fable-5.2"
+      label: "Claude Fable 5.2"
+      preset:
+        endpoint: "OpenRouter"
+        model: "anthropic/claude-fable-5.2"
