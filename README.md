@@ -327,13 +327,34 @@ and pick role **Workload Identity User** → **SAVE**.
 bindings, so `github-actions-deployer@${GOOGLE_PROJECT_ID}.iam.gserviceaccount.com`
 does not appear in the principal list yet — expected. Click **+ GRANT ACCESS**
 (no need to find the account): paste the email into *New principals*, it
-resolves although it is not listed, then add all five roles → **SAVE**:
+resolves although it is not listed, then add all seven roles → **SAVE**:
 **Cloud Run Admin**, **Artifact Registry Writer**, **Cloud Build Editor**,
-**Secret Manager Secret Accessor**, **Service Account User**. From then on the
-account shows up in the IAM list (pencil → *Edit principal* for later changes).
+**Secret Manager Secret Accessor**, **Service Account User**, **Service Usage
+Admin**, **Storage Admin**. From then on the account shows up in the IAM list
+(pencil → *Edit principal* for later changes).
+
+> **Role cheat-sheet** (which role does what):
+>
+> | Role | Needed for |
+> |---|---|
+> | Cloud Run Admin | `gcloud run deploy` + service describe |
+> | Artifact Registry Writer | push/pull images in the repo |
+> | Cloud Build Editor | `gcloud builds submit` (starts the build) |
+> | Service Usage Admin | use project services in API calls (`serviceusage.services.use`) |
+> | Storage Admin | upload the build source to the `PROJECT_ID_cloudbuild` staging bucket |
+> | Secret Manager Secret Accessor | attach the six secrets to the service |
+> | Service Account User | deploy with the runtime service account |
+>
+> Storage Admin + Service Usage Admin are required: `gcloud builds
+> submit` uploads the source tarball to `gs://PROJECT_ID_cloudbuild` as the
+> *deployer* SA, and a bare **Cloud Build Editor** cannot write that bucket.
+> The run fails with *"forbidden from accessing the bucket
+> [PROJECT_ID_cloudbuild]"* before any build starts. Editor on the Cloud Build
+> service account does **not** cover this (that account only acts *inside* the
+> build).
 
 Note: the *Service Accounts* page's permissions control access **to** the SA
-(who may impersonate it), not project roles **for** it. The five roles above
+(who may impersonate it), not project roles **for** it. The seven roles above
 are project-level and must be granted on the IAM page.
 
 ### 6. GitHub repository configuration
@@ -355,7 +376,7 @@ Either run the script by hand:
 ./scripts/deploy.sh
 ```
 
-or just `git push` to `main` — the workflow builds the image and deploys whenever `Dockerfile`, `librechat.yaml`, `cloudbuild.yaml`, `scripts/**` or the workflow itself changes. Doc-only changes (e.g. `README.md`) never trigger a run; to deploy without changing code, use the **Run workflow** button on the Actions tab (`workflow_dispatch`).
+or just `git push` to `main` — the workflow builds the image and deploys whenever `Dockerfile`, `librechat.yaml`, `cloudbuild.yaml`, `scripts/**` or the workflow itself changes. Doc-only changes (e.g. `README.md`) never trigger a run; to deploy without changing code, use the **Run workflow** button on the Actions tab (`workflow_dispatch`). CI needs all of steps 1–6 complete (roles, secrets, repo variables) — run `./scripts/deploy.sh` locally first if you want to validate the setup outside CI.
 
 When it finishes:
 
