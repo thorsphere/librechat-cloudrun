@@ -10,8 +10,7 @@ This repository is developed using AI-assisted engineering with strict human ove
   lives in Atlas; Cloud Run instances are disposable.
 - **Layout:** `Dockerfile` (multi-stage image build) · `librechat.yaml`
   (LibreChat config, baked into the image) · `cloudbuild.yaml` (image build
-  spec) · `scripts/gcp-setup.sh` (optional one-time GCP setup) ·
-  `scripts/deploy.sh` (build + deploy) · `.github/workflows/deploy.yml`
+  spec) · `scripts/deploy.sh` (build + deploy) · `.github/workflows/deploy.yml`
   (CI/CD) · `README.md` (canonical setup & ops guide — link to it, do not
   duplicate it here).
 - **Frameworks:** Bash + Docker build tooling only. This is NOT a Node
@@ -23,7 +22,7 @@ This repository is developed using AI-assisted engineering with strict human ove
 - **Configuration:** Secrets live only in Secret Manager and are attached as
   env vars at deploy time; `librechat.yaml` must stay secret-free and use
   `${ENV_VAR}` interpolation. Secret names and env names are fixed contracts
-  shared by `gcp-setup.sh`, `deploy.sh`, and the README (see §2).
+  shared by `deploy.sh` and the README (see §2).
 
 ---
 
@@ -59,13 +58,13 @@ When generating code, refactoring, or planning tasks, you MUST adhere to these t
   service-account id is `github-actions-deployer`. The WIF provider and SA go
   in GitHub repo *variables*, not secrets (identifiers, not credentials; the
   trust boundary is the WIF attribute condition pinning the repo).
-- **Secret names are a three-file contract:** `librechat-mongo-uri`,
+- **Secret names are a cross-file contract:** `librechat-mongo-uri`,
   `librechat-openrouter-api-key`, `librechat-creds-key`, `librechat-creds-iv`,
   `librechat-jwt-secret`, `librechat-jwt-refresh-secret` (Secret Manager,
   `librechat-` prefix = names are project-scoped) map 1:1 to
   `MONGO_URI`, `OPENROUTER_API_KEY`, `CREDS_KEY`, `CREDS_IV`,
   `JWT_SECRET`, `JWT_REFRESH_SECRET` (env vars, fixed by LibreChat) across
-  `gcp-setup.sh`, `deploy.sh`, and the README. Rename = edit all three.
+  `deploy.sh` and the README. Rename = edit both (and this entry).
 - **Config is baked, not mounted:** `librechat.yaml` is `COPY`-ed into the
   image and config changes require a rebuild. Cloud Run has no volume mounts;
   immutable revisions are the point.
@@ -80,18 +79,21 @@ When generating code, refactoring, or planning tasks, you MUST adhere to these t
   persistence workarounds.
 - **"First registered user becomes admin"** is upstream LibreChat behavior —
   not a misconfiguration.
+- **GCP setup is manual by design:** the project is configured by hand in the
+  console/CLI for maximum control and transparency; Do not add setup automation.
+  README steps 1–6 are the source of truth.
 
 ### 3. Build & Validation
 This is a deployment-config repository. There is no application code and no
 test suite. Validate changes locally with:
 
 ```bash
-bash -n scripts/gcp-setup.sh scripts/deploy.sh   # shell syntax
-docker build --check .                           # Dockerfile lint (BuildKit)
+bash -n scripts/deploy.sh   # shell syntax
+docker build --check .      # Dockerfile lint (BuildKit)
 ```
 
-- Never run `scripts/gcp-setup.sh` or `scripts/deploy.sh` as "validation" —
-  they mutate real GCP infrastructure.
+- Never run `scripts/deploy.sh` as "validation" —
+  it mutates real GCP infrastructure.
 - CI deploys only when the workflow's path filter matches (`Dockerfile`,
   `librechat.yaml`, `cloudbuild.yaml`, `scripts/**`, the workflow file).
   Doc-only changes never trigger a deploy.
